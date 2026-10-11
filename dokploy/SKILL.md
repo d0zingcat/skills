@@ -5,7 +5,13 @@ description: Deploy, inspect, configure, and troubleshoot applications, Docker C
 
 # Dokploy
 
-Operate the user's Dokploy instance through the bundled Python 3 API adapter, derived from the official MCP implementation. No MCP installation is required. Requires `DOKPLOY_URL` and `DOKPLOY_API_KEY` in the process environment. Read [references/connection.md](references/connection.md) for setup and compatibility details.
+Operate the user's Dokploy instance through the bundled Python 3 API adapter, derived from the official MCP implementation. No MCP installation is required. Connection settings are stored outside the skill in `~/.config/dokploy/config.json`; environment variables override saved fields. Read [references/connection.md](references/connection.md) for setup and compatibility details.
+
+## First-use connection setup
+
+Run `python3 scripts/dokploy.py config-status` before API operations. If settings are missing, guide the user to provide the instance base URL (without `/api`) and an API key from Dokploy's settings. Offer `python3 scripts/dokploy.py configure` in their terminal: it hides API key and optional custom-header input and saves a user-only local file. Do not ask the user to paste secrets into chat or place them in command arguments or repository files. Wait for required connection details before calling the API.
+
+When the user identifies an existing local secret source, read only the selected Dokploy connection fields without displaying their values, and pass them to `configure --input -` through stdin. Do not search unrelated credential stores. Configuration commands validate settings locally; they do not verify server authentication. Never display the saved file or overwrite an existing connection unless the user requests setup or a connection change.
 
 ## Discover and call endpoints
 
