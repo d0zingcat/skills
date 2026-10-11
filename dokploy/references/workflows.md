@@ -1,6 +1,6 @@
 # Operation workflows
 
-Names below are upstream names at the reviewed revision. Discover client equivalents and inspect live schemas. Create or deploy resources only when the request calls for it.
+Names below are upstream names at the reviewed revision. Use the adapter to search exact operation names and describe their schemas. Create or deploy resources only when the request calls for it.
 
 ## Applications
 
@@ -20,7 +20,7 @@ Inspect existing state with `compose-one`. For a new raw service, `compose-creat
 
 `compose-update` supports optional source, file, branch, provider, environment, and other settings. Send only intended changes. Do not replace a file or environment from a redacted read. `compose-loadServices` can identify service names for domain configuration.
 
-Use `compose-deploy` or a requested `compose-redeploy`, then inspect `deployment-allByCompose` with `composeId`. Build logs use `deployment-readLogs`. Runtime logs use `compose-readLogs`, which requires both `composeId` and an actual `containerId`; a service name is not a container ID. Discover available container inspection tools when needed.
+Use `compose-deploy` or a requested `compose-redeploy`, then inspect `deployment-allByCompose` with `composeId`. Build logs use `deployment-readLogs`. Runtime logs use `compose-readLogs`, which requires both `composeId` and an actual `containerId`; a service name is not a container ID. Search available container inspection endpoints when needed.
 
 ## Domains
 
@@ -40,4 +40,4 @@ Inspect `application-one` or `compose-one`, target deployment history, and bound
 
 Fix issues within the requested scope and verify a subsequent deployment when authorized. A failed build does not justify deleting resources, cancelling unrelated queue entries, pruning Docker, or changing shared Traefik settings.
 
-`rollback-rollback` requires a `rollbackId`, not a deployment ID. Resolve a valid rollback record and verify its target before an authorized rollback. If the connection does not expose that prerequisite, report it rather than inventing an ID.
+`rollback-rollback` requires a `rollbackId`, not a deployment ID. Resolve a valid rollback record and verify its target before an authorized rollback. If the API does not expose that prerequisite, report it rather than inventing an ID.

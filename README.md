@@ -6,4 +6,4 @@ A collection of reusable agent skills.
 
 | Skill | Purpose |
 | --- | --- |
-| [dokploy](dokploy/SKILL.md) | Deploy, inspect, and manage services through the official Dokploy MCP server. |
+| [dokploy](dokploy/SKILL.md) | Deploy, inspect, and manage services directly through the Dokploy API, without an MCP server. |

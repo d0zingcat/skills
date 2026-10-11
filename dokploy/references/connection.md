@@ -12,55 +12,34 @@ Reviewed commit: `26799a777e444a7cad6bb7ecf0d5969fb859fa58`, package version `0.
 - [Response formatter](https://github.com/Dokploy/mcp/blob/26799a777e444a7cad6bb7ecf0d5969fb859fa58/src/utils/responseFormatter.ts)
 - [Official setup guide](https://github.com/Dokploy/mcp/blob/26799a777e444a7cad6bb7ecf0d5969fb859fa58/README.md)
 
-## Stdio setup
+## Direct API setup
 
-Requires Node.js 18 or newer, a running Dokploy instance, and an API key with the needed resource permissions. Adapt the enclosing configuration format to the MCP client; populate credentials locally through its secret configuration mechanism.
+Requires Python 3.9 or newer and a running Dokploy instance. No third-party Python packages or MCP server are required. Supply `DOKPLOY_URL` and `DOKPLOY_API_KEY` through the process environment using local secret configuration. Use the instance base URL without `/api`; the adapter adds that prefix and sends the key as `x-api-key`.
 
-```json
-{
-  "mcpServers": {
-    "dokploy-mcp": {
-      "command": "npx",
-      "args": ["-y", "@dokploy/mcp"],
-      "env": {
-        "DOKPLOY_URL": "https://dokploy.example.com",
-        "DOKPLOY_API_KEY": "<configured-locally>",
-        "DOKPLOY_TOOL_PRESET": "deploy"
-      }
-    }
-  }
-}
+Optional settings:
+
+- `DOKPLOY_TIMEOUT`: milliseconds, default 30,000.
+- `DOKPLOY_CUSTOM_HEADERS`: JSON object of string proxy headers, for example Cloudflare Access service tokens. Cannot override `x-api-key`, `content-type`, or `accept`.
+
+The adapter never retries automatically and refuses HTTP redirects to prevent forwarding credentials. GET inputs become scalar query parameters; POST inputs become JSON bodies. Structured GET inputs are rejected rather than silently encoded incorrectly. Responses are recursively redacted using the upstream default field suffixes. Raw-secret output is deliberately not provided. Arbitrary text/log strings can still contain secrets; keep them private.
+
+## Catalog maintenance
+
+The catalog covers all 604 operations in the reviewed generated tool source. It stores methods, paths, tags, descriptions, input schemas, and schema components locally. Search and describe read this file in the process without loading it into the agent's context.
+
+To update from a reviewed checkout of the official repository:
+
+```bash
+python3 scripts/generate_catalog.py /path/to/Dokploy-mcp
 ```
 
-Supply the instance base URL without `/api`; the API client appends that prefix and authenticates with `x-api-key`. Existing connections need not be changed simply to use the skill.
-
-## Filtering
-
-| Preset | Included tags |
-| --- | --- |
-| `all` | All categories; default |
-| `minimal` | `project,application` |
-| `core` | `project,server,application` |
-| `deploy` | `project,environment,server,application,compose,domain,deployment` |
-| `databases` | `postgres,redis,mysql,mariadb,mongo,libsql` |
-| `git` | `github,gitlab,bitbucket,gitea,gitProvider,registry,sshKey` |
-
-A nonempty `DOKPLOY_ENABLED_TAGS` list overrides the preset; `DOKPLOY_DISABLED_TAGS` is applied last. Database operations that also need discovery can use `project,environment,postgres,deployment,backup`. Add categories such as `docker` or `rollback` when needed. Reload the connection after requested configuration changes.
-
-## Secrets and transport
-
-- `DOKPLOY_REDACT_ENV` defaults to `true`; keep it enabled for ordinary operations. Redaction covers Compose files and other secret-bearing fields too.
-- A nonempty `DOKPLOY_REDACT_FIELDS` replaces the default list; avoid inadvertently removing secret protection.
-- `DOKPLOY_CUSTOM_HEADERS` is a JSON object of string names and values for proxy headers, such as Cloudflare Access service tokens. It cannot override `x-api-key`, `content-type`, or `accept`. Keep token values secret.
-- Stdio is default. `--http` or `MCP_TRANSPORT=http` enables `/mcp`, `/health`, and legacy `/sse` and `/messages`. Do not publish a listener as a side effect of troubleshooting.
-- `DOKPLOY_TIMEOUT` defaults to 30,000 ms. The snapshot parses `DOKPLOY_RETRY_ATTEMPTS` and `DOKPLOY_RETRY_DELAY`, but its API client has no retry loop. Do not assume automatic recovery.
+The generator verifies that OpenAPI operations match generated tools and records the checkout commit and package version. Review endpoint changes and update the source snapshot above when refreshing. The catalog is derived from Apache-2.0 upstream material; attribution and license are in `assets/UPSTREAM-LICENSE`.
 
 ## Troubleshooting
 
 | Symptom | Next action |
 | --- | --- |
-| Missing tools | Inspect current filters and reload after a requested change. |
-| Tool listing overload | Select a suitable preset or explicit tags. |
+| Missing endpoint | Search the local catalog; check upstream and instance versions. |
 | 401 | Check configured API key and URL locally without printing credentials. |
 | 403 | Check resource permissions; do not bypass them. |
 | 404 | Re-resolve IDs and check instance/API compatibility. |

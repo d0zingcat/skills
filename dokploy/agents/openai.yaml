@@ -1,3 +1,3 @@
 interface:
   display_name: "Dokploy"
-  short_description: "Deploy and manage services with Dokploy MCP"
+  short_description: "Manage Dokploy through its API without MCP"
