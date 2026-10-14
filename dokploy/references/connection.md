@@ -14,7 +14,18 @@ Reviewed commit: `26799a777e444a7cad6bb7ecf0d5969fb859fa58`, package version `0.
 
 ## Direct API setup
 
-Requires Python 3.9 or newer and a running Dokploy instance. No third-party Python packages or MCP server are required. Supply `DOKPLOY_URL` and `DOKPLOY_API_KEY` through the process environment using local secret configuration. Use the instance base URL without `/api`; the adapter adds that prefix and sends the key as `x-api-key`.
+Requires Python 3.9 or newer and a running Dokploy instance. No third-party Python packages or MCP server are required. Run the interactive setup in a terminal:
+
+```bash
+python3 scripts/dokploy.py configure
+python3 scripts/dokploy.py config-status
+```
+
+Setup prompts for the base URL, a hidden API key, and optional hidden custom headers. Obtain an API key from the instance's Dokploy settings. Settings are saved as plaintext JSON in `~/.config/dokploy/config.json`, outside the skill and repository, with file mode `0600`. A newly created parent directory has mode `0700`. Keep this file private; do not commit or print it. `configure` replaces the saved connection only after validating the supplied settings and writes atomically. It does not contact the server.
+
+For an authorized existing secret source or automation, `configure --input -` accepts JSON on stdin; `--input /path/to/private/file.json` accepts a local file. Both use `DOKPLOY_URL`, `DOKPLOY_API_KEY`, and optionally `DOKPLOY_CUSTOM_HEADERS` and `DOKPLOY_TIMEOUT` as keys. Custom headers may be a JSON object or a JSON-encoded string. Never supply secret JSON as command arguments. `DOKPLOY_CONFIG` selects an alternative config-file path.
+
+Environment variables override individual saved fields, including explicitly empty values. With no saved file, environment-only use remains supported. `config-status` checks the effective configuration and reports only the config path and names of environment overrides; it never prints credentials or headers. Search and describe require no connection settings. Missing or invalid settings fail before any API request and guide the user to `configure`. Use the instance base URL without `/api`; the adapter adds that prefix and sends the key as `x-api-key`.
 
 Optional settings:
 
